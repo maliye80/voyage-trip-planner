@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Voyage — Dream Trip Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#060a10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 16px}
+.app{width:100%;max-width:760px;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);background:#0a0e17;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
+.hero{position:relative;height:230px;overflow:hidden;background:linear-gradient(135deg,#0d2137,#1a3a5c)}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity 1.2s ease}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,10,20,0.3) 0%,rgba(5,10,20,0.78) 100%)}
+.hero-content{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:20px 26px}
+.hero-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-mark{font-size:18px;color:#c9a96e}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:300;letter-spacing:3px;color:#fff}
+.hero-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lang-wrap{position:relative}
+.lang-wrap select{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 26px 5px 10px;border-radius:8px;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;backdrop-filter:blur(8px)}
+.lang-wrap select option{background:#0d1a2b;color:#fff}
+.lang-wrap::after{content:"▾";position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:rgba(255,255,255,0.7);pointer-events:none}
+.nav-tabs{display:flex;gap:3px;background:rgba(255,255,255,0.1);border-radius:9px;padding:3px;backdrop-filter:blur(8px)}
+.nav-tab{font-size:11px;padding:5px 13px;border-radius:6px;border:none;background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.5px;transition:all 0.2s}
+.nav-tab.active{background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.2)}
+.hero-dest{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:#fff;letter-spacing:1px;line-height:1.1}
+.hero-sub{font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px;letter-spacing:0.8px}
+.weather-badge{display:none;align-items:center;gap:5px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:99px;padding:3px 10px;font-size:12px;color:rgba(255,255,255,0.85);backdrop-filter:blur(6px);margin-top:6px;width:fit-content}
+.body{padding:24px 26px}
+.price-strip{display:none;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.price-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 16px}
+.pc-label{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:3px}
+.pc-value{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:#c9a96e}
+.pc-sub{font-size:11px;color:rgba(255,255,255,0.3);margin-top:1px}
+.section-label{font-size:10px;letter-spacing:3px;color:#c9a96e;margin-bottom:14px;text-transform:uppercase}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr}}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg.full{grid-column:1/-1}
+.fl{font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.4);text-transform:uppercase}
+.fi{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:#fff;outline:none;width:100%;transition:border-color 0.2s}
+.fi:focus{border-color:rgba(201,169,110,0.5)}
+.fi::placeholder{color:rgba(255,255,255,0.2)}
+.fi option{background:#0d1a2b;color:#fff}
+.budget-row{display:flex;gap:8px}
+.budget-row .fi:first-child{flex:1}
+.budget-row .fi:last-child{width:115px;flex-shrink:0}
+textarea.fi{resize:none;height:68px;line-height:1.6}
+.vibe-row{display:flex;flex-wrap:wrap;gap:7px}
+.vibe-chip{font-size:12px;padding:5px 13px;border-radius:99px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.2s;user-select:none}
+.vibe-chip.selected{background:rgba(201,169,110,0.12);border-color:#c9a96e;color:#c9a96e}
+.gen-btn{width:100%;padding:13px;margin-top:18px;background:linear-gradient(135deg,#c9a96e,#9d7535);border:none;border-radius:11px;color:#0a0e17;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s}
+.gen-btn:hover{opacity:0.87}
+.gen-btn:disabled{opacity:0.35;cursor:not-allowed}
+.loader-wrap{display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:12px}
+.loader-wrap.on{display:flex}
+.spinner{width:32px;height:32px;border:2px solid rgba(201,169,110,0.2);border-top-color:#c9a96e;border-radius:50%;animation:spin 0.85s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-txt{font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:1px}
+.plan-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:13px;padding:16px 18px;margin-bottom:14px}
+.plan-title{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:300;color:#c9a96e;margin-bottom:8px}
+.plan-text{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.75;white-space:pre-wrap}
+.action-row{display:flex;gap:7px;flex-wrap:wrap}
+.abtn{font-size:12px;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.5px;transition:all 0.2s}
+.abtn:hover{border-color:#c9a96e;color:#c9a96e}
+.map-wrap{margin-top:10px;border-radius:13px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);display:none}
+.map-wrap.on{display:block}
+.map-wrap iframe{width:100%;height:240px;border:none;display:block}
+.card-wrap{margin-top:10px;border-radius:13px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);display:none}
+.card-wrap.on{display:block}
+canvas{display:block;width:100%;height:auto}
+.dl-btn{width:100%;margin-top:8px;padding:10px;background:linear-gradient(135deg,#c9a96e,#9d7535);border:none;border-radius:10px;color:#0a0e17;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:1px;cursor:pointer;transition:opacity 0.2s}
+.dl-btn:hover{opacity:0.85}
+.chat-msgs{height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;margin-bottom:12px;padding-right:4px}
+.chat-msgs::-webkit-scrollbar{width:2px}
+.chat-msgs::-webkit-scrollbar-thumb{background:rgba(201,169,110,0.3);border-radius:99px}
+.msg{max-width:82%;padding:9px 13px;border-radius:11px;font-size:13px;line-height:1.6}
+.msg.user{align-self:flex-end;background:rgba(201,169,110,0.14);border:1px solid rgba(201,169,110,0.22);color:#fff}
+.msg.ai{align-self:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.65)}
+.msg-lbl{font-size:9px;letter-spacing:1.5px;color:#c9a96e;margin-bottom:3px;text-transform:uppercase}
+.chat-row{display:flex;gap:8px}
+.chat-row .fi{flex:1}
+.send-btn{background:linear-gradient(135deg,#c9a96e,#9d7535);border:none;border-radius:9px;padding:0 16px;color:#0a0e17;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity 0.2s}
+.send-btn:hover{opacity:0.85}
+.send-btn:disabled{opacity:0.35}
+.hist-empty{text-align:center;padding:44px 20px;color:rgba(255,255,255,0.25);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px}
+.hist-item{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:13px 15px;margin-bottom:9px;transition:border-color 0.2s}
+.hist-item:hover{border-color:rgba(201,169,110,0.35)}
+.hi-dest{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:#c9a96e}
+.hi-meta{font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px}
+.hi-acts{display:flex;gap:6px;margin-top:7px}
+.hi-btn{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.hi-btn:hover{border-color:#c9a96e;color:#c9a96e}
+.hi-btn.del:hover{border-color:#c0392b;color:#c0392b}
+.view{display:none}
+.view.on{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-top">
+        <div class="logo">
+          <span class="logo-mark">✦</span>
+          <span class="logo-name">VOYAGE</span>
+        </div>
+        <div class="hero-controls">
+          <div class="lang-wrap">
+            <select id="langSel" onchange="setLang(this.value)">
+              <option value="en">🇬🇧 English</option>
+              <option value="tr">🇹🇷 Türkçe</option>
+              <option value="de">🇩🇪 Deutsch</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="es">🇪🇸 Español</option>
+              <option value="ar">🇸🇦 العربية</option>
+              <option value="zh">🇨🇳 中文</option>
+              <option value="ja">🇯🇵 日本語</option>
+            </select>
+          </div>
+          <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showView('plan')" id="tab-plan">Plan</button>
+            <button class="nav-tab" onclick="showView('chat')" id="tab-chat">Chat</button>
+            <button class="nav-tab" onclick="showView('hist')" id="tab-hist">History</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="hero-dest" id="heroDest">Dream Trip Planner</div>
+        <div class="hero-sub" id="heroSub">Tell us your dream — AI builds your perfect journey</div>
+        <div class="weather-badge" id="weatherBadge"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view on body" id="view-plan">
+    <div class="price-strip" id="priceStrip">
+      <div class="price-card"><div class="pc-label" id="lFlight">Est. Flight</div><div class="pc-value" id="flightVal">—</div><div class="pc-sub" id="flightSub"></div></div>
+      <div class="price-card"><div class="pc-label" id="lHotel">Est. Hotel/night</div><div class="pc-value" id="hotelVal">—</div><div class="pc-sub" id="hotelSub"></div></div>
+    </div>
+    <p class="section-label" id="lPlanTitle">Design your journey</p>
+    <div class="form-grid">
+      <div class="fg"><label class="fl" id="lBudget">Budget</label>
+        <div class="budget-row">
+          <input class="fi" type="number" id="budget" placeholder="5000" min="0"/>
+          <select class="fi" id="currency">
+            <option value="USD">$ USD</option><option value="EUR">€ EUR</option>
+            <option value="GBP">£ GBP</option><option value="TRY">₺ TRY</option>
+            <option value="JPY">¥ JPY</option><option value="AED">AED</option>
+            <option value="CHF">CHF</option><option value="CAD">CA$</option>
+            <option value="AUD">A$</option><option value="CNY">¥ CNY</option>
+            <option value="INR">₹ INR</option><option value="BRL">R$</option>
+            <option value="MXN">MXN</option><option value="KRW">₩</option><option value="SAR">SAR</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl" id="lDuration">Duration</label>
+        <select class="fi" id="duration">
+          <option id="d0" value=""></option><option id="d1" value="Weekend"></option>
+          <option id="d2" value="Short"></option><option id="d3" value="1 week"></option>
+          <option id="d4" value="2 weeks"></option><option id="d5" value="1 month+"></option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl" id="lFrom">From</label><input class="fi" type="text" id="from"/></div>
+      <div class="fg"><label class="fl" id="lTo">Destination</label><input class="fi" type="text" id="to"/></div>
+      <div class="fg full"><label class="fl" id="lVibe">Travel vibe</label><div class="vibe-row" id="vibes"></div></div>
+      <div class="fg full"><label class="fl" id="lWishes">Special wishes</label><textarea class="fi" id="wishes"></textarea></div>
+    </div>
+    <button class="gen-btn" id="genBtn" onclick="generate()"></button>
+    <div class="loader-wrap" id="loader"><div class="spinner"></div><div class="loader-txt" id="loaderTxt"></div></div>
+    <div id="resultArea" style="display:none;margin-top:18px">
+      <div class="plan-card"><div class="plan-title" id="rTitle"></div><div class="plan-text" id="rContent"></div></div>
+      <div class="action-row">
+        <button class="abtn" id="mapBtn" onclick="togMap()"></button>
+        <button class="abtn" id="chatBtn" onclick="showView('chat')"></button>
+        <button class="abtn" id="cardBtn" onclick="togCard()"></button>
+        <button class="abtn" id="copyBtn" onclick="copyT()"></button>
+      </div>
+      <div class="map-wrap" id="mapWrap"><iframe id="mapFr" src=""></iframe></div>
+      <div class="card-wrap" id="cardWrap"><canvas id="cv"></canvas><button class="dl-btn" id="dlBtn" onclick="dlCard()"></button></div>
+    </div>
+  </div>
+
+  <div class="view body" id="view-chat">
+    <p class="section-label" id="lChatTitle">Refine your trip</p>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="msg ai"><div class="msg-lbl">Voyage AI</div><span id="chatWelcome">Generate a trip plan first, then ask me anything!</span></div>
+    </div>
+    <div class="chat-row">
+      <input class="fi" type="text" id="chatIn" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')sendChat()"/>
+      <button class="send-btn" id="sendBtn" onclick="sendChat()">Send ↗</button>
+    </div>
+  </div>
+
+  <div class="view body" id="view-hist">
+    <p class="section-label" id="lHistTitle">Saved journeys</p>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<script>
+const T={
+  en:{lPlanTitle:"Design your journey",lBudget:"Budget",lDuration:"Duration",lFrom:"From",lTo:"Destination (optional)",lVibe:"Travel vibe",lWishes:"Special wishes",dOpts:["Select...","Weekend (2-3 days)","Short (4-6 days)","1 week","2 weeks","1 month+"],vibes:["Adventure","Relaxation","Culture","Food","Nature","Nightlife","Romance","Family"],fromPh:"e.g. Istanbul",toPh:"e.g. Japan",wishesPh:"Cherry blossoms, solo travel...",btn:"CRAFT MY JOURNEY",loading:"Crafting your dream journey...",lFlight:"Est. Flight",lHotel:"Est. Hotel/night",mapBtn:"Map",hideMap:"Hide map",chatBtn:"Refine with AI",cardBtn:"Share card",copyBtn:"Copy",copied:"Copied!",dlBtn:"Download (1080×1080)",lChatTitle:"Refine your trip",chatWelcome:"Generate a trip plan first, then ask me anything!",lHistTitle:"Saved journeys",histEmpty:"No saved journeys yet.",histView:"View",histDel:"Delete",errFill:"Please fill in budget, duration and departure city.",errFail:"Could not generate. Please try again.",heroSub:"Tell us your dream — AI builds your perfect journey",promptLang:"English"},
+  tr:{lPlanTitle:"Yolculuğunu tasarla",lBudget:"Bütçe",lDuration:"Süre",lFrom:"Kalkış",lTo:"Destinasyon (isteğe bağlı)",lVibe:"Seyahat tarzı",lWishes:"Özel istekler",dOpts:["Seç...","Hafta sonu (2-3 gün)","Kısa (4-6 gün)","1 hafta","2 hafta","1 ay+"],vibes:["Macera","Dinlenme","Kültür","Yemek","Doğa","Gece hayatı","Romantizm","Aile"],fromPh:"örn. İstanbul",toPh:"örn. Japonya",wishesPh:"Kiraz çiçekleri, solo seyahat...",btn:"YOLCULUĞUMU OLUŞTUR",loading:"Hayal seyahatini hazırlıyorum...",lFlight:"Tahmini Uçuş",lHotel:"Tahmini Otel/gece",mapBtn:"Harita",hideMap:"Haritayı gizle",chatBtn:"AI ile geliştir",cardBtn:"Paylaşım kartı",copyBtn:"Kopyala",copied:"Kopyalandı!",dlBtn:"İndir (1080×1080)",lChatTitle:"Planını geliştir",chatWelcome:"Önce tatil planı oluştur, sonra bana her şeyi sorabilirsin!",lHistTitle:"Kayıtlı yolculuklar",histEmpty:"Henüz kayıtlı yolculuk yok.",histView:"Görüntüle",histDel:"Sil",errFill:"Lütfen bütçe, süre ve kalkış şehrini girin.",errFail:"Oluşturulamadı. Tekrar deneyin.",heroSub:"Hayalini anlat — AI mükemmel tatilini kursun",promptLang:"Turkish"},
+  de:{lPlanTitle:"Gestalte deine Reise",lBudget:"Budget",lDuration:"Dauer",lFrom:"Von",lTo:"Ziel (optional)",lVibe:"Reisestil",lWishes:"Besondere Wünsche",dOpts:["Wählen...","Wochenende","Kurz (4-6 Tage)","1 Woche","2 Wochen","1 Monat+"],vibes:["Abenteuer","Erholung","Kultur","Essen","Natur","Nachtleben","Romantik","Familie"],fromPh:"z.B. Istanbul",toPh:"z.B. Japan",wishesPh:"Kirschblüten...",btn:"REISE GESTALTEN",loading:"Plane deine Traumreise...",lFlight:"Geschätzter Flug",lHotel:"Hotel/Nacht",mapBtn:"Karte",hideMap:"Karte verbergen",chatBtn:"Mit AI verfeinern",cardBtn:"Share-Karte",copyBtn:"Kopieren",copied:"Kopiert!",dlBtn:"Herunterladen (1080×1080)",lChatTitle:"Reise verfeinern",chatWelcome:"Erstelle zuerst einen Plan, dann frag mich alles!",lHistTitle:"Gespeicherte Reisen",histEmpty:"Keine gespeicherten Reisen.",histView:"Anzeigen",histDel:"Löschen",errFill:"Bitte Budget, Dauer und Abflugstadt ausfüllen.",errFail:"Konnte nicht erstellt werden.",heroSub:"Erzähl deinen Traum — AI plant deine perfekte Reise",promptLang:"German"},
+  fr:{lPlanTitle:"Concevez votre voyage",lBudget:"Budget",lDuration:"Durée",lFrom:"Départ",lTo:"Destination (optionnel)",lVibe:"Style",lWishes:"Souhaits",dOpts:["Choisir...","Week-end","Court (4-6 jours)","1 semaine","2 semaines","1 mois+"],vibes:["Aventure","Détente","Culture","Gastronomie","Nature","Vie nocturne","Romance","Famille"],fromPh:"ex. Istanbul",toPh:"ex. Japon",wishesPh:"Fleurs de cerisier...",btn:"CRÉER MON VOYAGE",loading:"Création de votre voyage...",lFlight:"Vol estimé",lHotel:"Hôtel/nuit",mapBtn:"Carte",hideMap:"Cacher",chatBtn:"Affiner avec IA",cardBtn:"Carte partage",copyBtn:"Copier",copied:"Copié!",dlBtn:"Télécharger (1080×1080)",lChatTitle:"Affiner",chatWelcome:"Générez un plan, puis posez vos questions!",lHistTitle:"Voyages sauvegardés",histEmpty:"Aucun voyage.",histView:"Voir",histDel:"Supprimer",errFill:"Remplissez budget, durée et départ.",errFail:"Impossible de générer.",heroSub:"Dites-nous votre rêve — l'IA planifie votre voyage",promptLang:"French"},
+  es:{lPlanTitle:"Diseña tu viaje",lBudget:"Presupuesto",lDuration:"Duración",lFrom:"Desde",lTo:"Destino (opcional)",lVibe:"Estilo",lWishes:"Deseos",dOpts:["Seleccionar...","Fin de semana","Corto","1 semana","2 semanas","1 mes+"],vibes:["Aventura","Relajación","Cultura","Gastronomía","Naturaleza","Vida nocturna","Romance","Familia"],fromPh:"ej. Estambul",toPh:"ej. Japón",wishesPh:"Flores de cerezo...",btn:"CREAR MI VIAJE",loading:"Creando tu viaje...",lFlight:"Vuelo estimado",lHotel:"Hotel/noche",mapBtn:"Mapa",hideMap:"Ocultar",chatBtn:"Mejorar con IA",cardBtn:"Tarjeta",copyBtn:"Copiar",copied:"Copiado!",dlBtn:"Descargar (1080×1080)",lChatTitle:"Refinar",chatWelcome:"Genera un plan, luego pregúntame!",lHistTitle:"Viajes guardados",histEmpty:"No hay viajes.",histView:"Ver",histDel:"Eliminar",errFill:"Completa presupuesto, duración y ciudad.",errFail:"No se pudo generar.",heroSub:"Cuéntanos tu sueño — la IA crea tu viaje",promptLang:"Spanish"},
+  ar:{lPlanTitle:"صمّم رحلتك",lBudget:"الميزانية",lDuration:"المدة",lFrom:"من",lTo:"الوجهة",lVibe:"أسلوب السفر",lWishes:"رغبات",dOpts:["اختر...","نهاية الأسبوع","قصير","أسبوع","أسبوعان","شهر+"],vibes:["مغامرة","استرخاء","ثقافة","طعام","طبيعة","حياة ليلية","رومانسية","عائلة"],fromPh:"مثل: إسطنبول",toPh:"مثل: اليابان",wishesPh:"أزهار الكرز...",btn:"أنشئ رحلتي",loading:"جارٍ إنشاء رحلتك...",lFlight:"تكلفة الطيران",lHotel:"الفندق/ليلة",mapBtn:"الخريطة",hideMap:"إخفاء",chatBtn:"تطوير",cardBtn:"بطاقة",copyBtn:"نسخ",copied:"تم!",dlBtn:"تحميل (1080×1080)",lChatTitle:"تطوير",chatWelcome:"أنشئ خطة أولاً ثم اسألني!",lHistTitle:"الرحلات المحفوظة",histEmpty:"لا توجد رحلات.",histView:"عرض",histDel:"حذف",errFill:"يرجى ملء الميزانية والمدة والمدينة.",errFail:"تعذر الإنشاء.",heroSub:"أخبرنا بحلمك — الذكاء الاصطناعي يبني رحلتك",promptLang:"Arabic"},
+  zh:{lPlanTitle:"设计您的旅程",lBudget:"预算",lDuration:"时长",lFrom:"出发",lTo:"目的地（可选）",lVibe:"旅行风格",lWishes:"特别愿望",dOpts:["选择...","周末","短途","1周","2周","1个月以上"],vibes:["冒险","休闲","文化","美食","自然","夜生活","浪漫","家庭"],fromPh:"例如：伊斯坦布尔",toPh:"例如：日本",wishesPh:"樱花，独自旅行...",btn:"规划我的旅程",loading:"正在规划...",lFlight:"预估机票",lHotel:"预估酒店/晚",mapBtn:"地图",hideMap:"隐藏",chatBtn:"AI优化",cardBtn:"分享卡片",copyBtn:"复制",copied:"已复制!",dlBtn:"下载（1080×1080）",lChatTitle:"优化旅程",chatWelcome:"先生成计划，然后问我!",lHistTitle:"已保存的旅程",histEmpty:"暂无保存。",histView:"查看",histDel:"删除",errFill:"请填写预算、时长和城市。",errFail:"生成失败。",heroSub:"告诉我们你的梦想 — AI为你规划旅程",promptLang:"Chinese"},
+  ja:{lPlanTitle:"旅をデザインする",lBudget:"予算",lDuration:"期間",lFrom:"出発地",lTo:"目的地（任意）",lVibe:"旅のスタイル",lWishes:"ご要望",dOpts:["選択...","週末","短期","1週間","2週間","1ヶ月以上"],vibes:["冒険","リラックス","文化","グルメ","自然","ナイトライフ","ロマンス","家族"],fromPh:"例：イスタンブール",toPh:"例：日本",wishesPh:"桜、一人旅...",btn:"旅をプランする",loading:"計画中...",lFlight:"航空券（目安）",lHotel:"ホテル/泊",mapBtn:"地図",hideMap:"隠す",chatBtn:"AIで改善",cardBtn:"カード",copyBtn:"コピー",copied:"コピー済み!",dlBtn:"ダウンロード（1080×1080）",lChatTitle:"旅を改善",chatWelcome:"プランを作成してから質問してください!",lHistTitle:"保存された旅",histEmpty:"保存なし。",histView:"表示",histDel:"削除",errFill:"予算、期間、出発都市を入力してください。",errFail:"生成できませんでした。",heroSub:"夢を教えてください — AIが完璧な旅を作ります",promptLang:"Japanese"}
+};
+
+let lang='en',sel=[],mapVis=false,cardVis=false,lastDest='',lastTitle='',lastContent='',lastCur='USD',chatHist=[];
+
+const defaultBgs=['https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&q=80','https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&q=80','https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1200&q=80'];
+let bgIdx=0;
+function cycleBg(){document.getElementById('heroBg').style.backgroundImage=`url(${defaultBgs[bgIdx%defaultBgs.length]})`;bgIdx++;}
+cycleBg();
+setInterval(()=>{const bg=document.getElementById('heroBg');bg.style.opacity='0';setTimeout(()=>{cycleBg();bg.style.opacity='1';},600);},5000);
+
+function setLang(l){lang=l;applyT();}
+function applyT(){
+  const t=T[lang];
+  document.getElementById('heroDest').textContent='Dream Trip Planner';
+  document.getElementById('heroSub').textContent=t.heroSub;
+  document.getElementById('lPlanTitle').textContent=t.lPlanTitle;
+  ['lBudget','lDuration','lFrom','lTo','lVibe','lWishes','lFlight','lHotel','lChatTitle','lHistTitle'].forEach(id=>{const el=document.getElementById(id);if(el&&t[id])el.textContent=t[id];});
+  t.dOpts.forEach((txt,i)=>{const el=document.getElementById('d'+i);if(el)el.textContent=txt;});
+  document.getElementById('from').placeholder=t.fromPh;
+  document.getElementById('to').placeholder=t.toPh;
+  document.getElementById('wishes').placeholder=t.wishesPh;
+  document.getElementById('genBtn').textContent=t.btn;
+  document.getElementById('loaderTxt').textContent=t.loading;
+  document.getElementById('chatWelcome').textContent=t.chatWelcome;
+  ['mapBtn','chatBtn','cardBtn','copyBtn','dlBtn'].forEach(id=>{const el=document.getElementById(id);if(el&&t[id])el.textContent=t[id];});
+  const vc=document.getElementById('vibes');sel=[];vc.innerHTML='';
+  t.vibes.forEach(v=>{
+    const c=document.createElement('span');c.className='vibe-chip';c.textContent=v;
+    c.addEventListener('click',()=>{if(sel.includes(v)){sel=sel.filter(x=>x!==v);c.classList.remove('selected');}else{sel.push(v);c.classList.add('selected');}});
+    vc.appendChild(c);
+  });
+}
+
+function showView(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.nav-tab').forEach(e=>e.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('on');
+  document.getElementById('tab-'+v).classList.add('active');
+  if(v==='hist')renderHist();
+}
+
+async function callAI(prompt, maxTokens){
+  const res = await fetch('/api/generate', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({prompt, maxTokens})
+  });
+  if(!res.ok) throw new Error(await res.text());
+  const data = await res.json();
+  return data.text;
+}
+
+async function generate(){
+  const t=T[lang];
+  const budget=document.getElementById('budget').value;
+  const cur=document.getElementById('currency').value;
+  const dur=document.getElementById('duration').value;
+  const from=document.getElementById('from').value;
+  const to=document.getElementById('to').value;
+  const wishes=document.getElementById('wishes').value;
+  if(!budget||!dur||!from){alert(t.errFill);return;}
+  lastCur=cur;
+  document.getElementById('genBtn').disabled=true;
+  document.getElementById('loader').classList.add('on');
+  document.getElementById('resultArea').style.display='none';
+  document.getElementById('priceStrip').style.display='none';
+  mapVis=false;cardVis=false;
+  document.getElementById('mapWrap').classList.remove('on');
+  document.getElementById('cardWrap').classList.remove('on');
+
+  const prompt=`You are a luxury travel planner. Respond in ${t.promptLang}.
+- Budget: ${budget} ${cur}
+- Duration: ${dur}
+- From: ${from}
+- Destination: ${to||'Suggest best destination'}
+- Vibes: ${sel.length?sel.join(', '):'General'}
+- Wishes: ${wishes||'None'}
+Write:
+1. Catchy trip title
+2. Why perfect for them
+3. Day-by-day highlights
+4. Top 3 must-do experiences
+5. Budget breakdown in ${cur}
+6. Best season to visit
+7. One secret local tip
+At the end on separate lines:
+FLIGHT: [estimated round trip in ${cur}]
+HOTEL: [estimated per night in ${cur}]
+DESTINATION: [City, Country]`;
+
+  try{
+    const text = await callAI(prompt, 1100);
+    const lines=text.split('\n');
+    const dL=lines.find(l=>l.trim().startsWith('DESTINATION:'));
+    const fL=lines.find(l=>l.trim().startsWith('FLIGHT:'));
+    const hL=lines.find(l=>l.trim().startsWith('HOTEL:'));
+    lastDest=dL?dL.replace('DESTINATION:','').trim():(to||from);
+    const flight=fL?fL.replace('FLIGHT:','').trim():'—';
+    const hotel=hL?hL.replace('HOTEL:','').trim():'—';
+    const clean=lines.filter(l=>!l.trim().match(/^(DESTINATION|FLIGHT|HOTEL):/));
+    lastTitle=clean[0].replace(/^#+\s*/,'').replace(/\*\*/g,'').trim();
+    lastContent=clean.slice(1).join('\n').replace(/\*\*/g,'').trim();
+    document.getElementById('flightVal').textContent=flight;
+    document.getElementById('flightSub').textContent=cur+' · per person';
+    document.getElementById('hotelVal').textContent=hotel;
+    document.getElementById('hotelSub').textContent=cur+' · per night';
+    document.getElementById('priceStrip').style.display='grid';
+    document.getElementById('heroDest').textContent=lastDest;
+    document.getElementById('heroSub').textContent=lastTitle;
+    document.getElementById('rTitle').textContent=lastTitle;
+    document.getElementById('rContent').textContent=lastContent;
+    ['mapBtn','chatBtn','cardBtn','copyBtn','dlBtn'].forEach(id=>{const el=document.getElementById(id);if(el&&t[id])el.textContent=t[id];});
+    document.getElementById('resultArea').style.display='block';
+    fetchWeather(lastDest);fetchPhoto(lastDest);
+    chatHist=[{role:'assistant',content:'Trip to '+lastDest+' ready! Ask me anything.'}];
+    saveHist();
+  }catch(e){alert(t.errFail+'\n'+e.message.slice(0,150));}
+  document.getElementById('loader').classList.remove('on');
+  document.getElementById('genBtn').disabled=false;
+}
+
+async function fetchWeather(dest){
+  try{
+    const city=encodeURIComponent(dest.split(',')[0].trim());
+    const g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`);
+    const gd=await g.json();
+    if(!gd.results?.[0])return;
+    const{latitude,longitude}=gd.results[0];
+    const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode&timezone=auto`);
+    const wd=await w.json();
+    if(!wd.current)return;
+    const icons={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',61:'🌧️',71:'❄️',80:'🌦️',95:'⛈️'};
+    const badge=document.getElementById('weatherBadge');
+    badge.textContent=(icons[wd.current.weathercode]||'🌡️')+' '+Math.round(wd.current.temperature_2m)+'°C';
+    badge.style.display='inline-flex';
+  }catch{}
+}
+
+async function fetchPhoto(dest){
+  try{
+    const q=encodeURIComponent(dest.split(',')[0].trim()+' travel landscape');
+    const r=await fetch(`https://api.unsplash.com/search/photos?query=${q}&per_page=1&orientation=landscape&client_id=YWlvB8aTtmHqP2_xq7BZaAGOuL2qZAm0gY1jIGshCss`);
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d.results?.[0]){const bg=document.getElementById('heroBg');bg.style.opacity='0';setTimeout(()=>{bg.style.backgroundImage=`url(${d.results[0].urls.regular})`;bg.style.opacity='1';},300);}
+  }catch{}
+}
+
+async function sendChat(){
+  const t=T[lang];
+  const inp=document.getElementById('chatIn');
+  const msg=inp.value.trim();if(!msg)return;
+  inp.value='';
+  const msgs=document.getElementById('chatMsgs');
+  const ud=document.createElement('div');ud.className='msg user';ud.textContent=msg;
+  msgs.appendChild(ud);msgs.scrollTop=msgs.scrollHeight;
+  document.getElementById('sendBtn').disabled=true;
+  chatHist.push({role:'user',content:msg});
+  const prompt=`You are a luxury travel concierge. Respond in ${t.promptLang}. Current trip: ${lastTitle||'not generated'} to ${lastDest||'unknown'}. Summary: ${lastContent.slice(0,500)}\n\nUser: ${msg}`;
+  try{
+    const reply=(await callAI(prompt,500)).replace(/\*\*/g,'').trim();
+    chatHist.push({role:'assistant',content:reply});
+    const ad=document.createElement('div');ad.className='msg ai';
+    ad.innerHTML='<div class="msg-lbl">Voyage AI</div>'+reply;
+    msgs.appendChild(ad);msgs.scrollTop=msgs.scrollHeight;
+  }catch(e){const ed=document.createElement('div');ed.className='msg ai';ed.textContent='Hata: '+e.message;msgs.appendChild(ed);}
+  document.getElementById('sendBtn').disabled=false;
+}
+
+function togMap(){
+  const t=T[lang];mapVis=!mapVis;
+  const w=document.getElementById('mapWrap');
+  if(mapVis){document.getElementById('mapFr').src=`https://maps.google.com/maps?q=${encodeURIComponent(lastDest)}&z=7&output=embed`;w.classList.add('on');document.getElementById('mapBtn').textContent=t.hideMap;}
+  else{w.classList.remove('on');document.getElementById('mapBtn').textContent=t.mapBtn;}
+}
+
+function togCard(){cardVis=!cardVis;const w=document.getElementById('cardWrap');if(cardVis){w.classList.add('on');drawCard();}else w.classList.remove('on');}
+
+function wrapTxt(ctx,text,x,y,mw,lh){const words=text.split(' ');let line='',ly=y;for(let i=0;i<words.length;i++){const test=line+words[i]+' ';if(ctx.measureText(test).width>mw&&i>0){ctx.fillText(line,x,ly);line=words[i]+' ';ly+=lh;}else line=test;}ctx.fillText(line,x,ly);return ly;}
+
+function drawCard(){
+  const cv=document.getElementById('cv');const ctx=cv.getContext('2d');const W=1080,H=1080;cv.width=W;cv.height=H;
+  const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0a0e17');g.addColorStop(0.55,'#0d1e30');g.addColorStop(1,'#0a1420');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(201,169,110,0.06)';ctx.lineWidth=1;for(let i=0;i<W;i+=90){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke();}for(let i=0;i<H;i+=90){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke();}
+  const glow=ctx.createRadialGradient(W/2,320,0,W/2,320,360);glow.addColorStop(0,'rgba(201,169,110,0.09)');glow.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(201,169,110,0.22)';ctx.lineWidth=1;ctx.strokeRect(38,38,W-76,H-76);
+  ctx.font='300 22px serif';ctx.fillStyle='rgba(201,169,110,0.55)';ctx.textAlign='center';ctx.fillText('✦  V O Y A G E  ✦',W/2,102);
+  ctx.strokeStyle='rgba(201,169,110,0.14)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(150,122);ctx.lineTo(W-150,122);ctx.stroke();
+  ctx.font='300 56px serif';ctx.fillStyle='#e8c98a';ctx.textAlign='center';
+  const tls=[];let tl='';lastTitle.toUpperCase().split(' ').forEach(w=>{if(ctx.measureText(tl+w+' ').width>820){tls.push(tl.trim());tl=w+' ';}else tl+=w+' ';});if(tl.trim())tls.push(tl.trim());
+  tls.slice(0,3).forEach((l,i)=>ctx.fillText(l,W/2,196+i*68));
+  const dy=196+Math.min(tls.length,3)*68+24;ctx.font='300 26px serif';ctx.fillStyle='rgba(201,169,110,0.65)';ctx.fillText('— '+lastDest+' —',W/2,dy);
+  ctx.strokeStyle='rgba(201,169,110,0.1)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(150,dy+22);ctx.lineTo(W-150,dy+22);ctx.stroke();
+  ctx.font='300 22px sans-serif';ctx.fillStyle='rgba(240,234,216,0.6)';ctx.textAlign='left';let cy=dy+60;
+  lastContent.split('\n').filter(l=>l.trim()).slice(0,8).forEach(line=>{if(cy>H-160)return;const cl=line.replace(/^[-•*\d.]+\s*/,'').trim();if(!cl)return;cy=wrapTxt(ctx,cl,90,cy,900,34)+34;});
+  ctx.strokeStyle='rgba(201,169,110,0.13)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(150,H-98);ctx.lineTo(W-150,H-98);ctx.stroke();
+  ctx.font='300 17px sans-serif';ctx.fillStyle='rgba(201,169,110,0.38)';ctx.textAlign='center';ctx.fillText('AI-Powered Luxury Travel Planning',W/2,H-62);
+}
+
+function dlCard(){const a=document.createElement('a');a.download='voyage-trip.png';a.href=document.getElementById('cv').toDataURL('image/png');a.click();}
+
+function copyT(){
+  const t=T[lang];
+  navigator.clipboard.writeText(lastTitle+'\n\n'+lastContent).then(()=>{const b=document.getElementById('copyBtn');b.textContent=t.copied;setTimeout(()=>b.textContent=t.copyBtn,2000);});
+}
+
+function saveHist(){
+  const hist=JSON.parse(localStorage.getItem('voyage_hist')||'[]');
+  hist.unshift({id:Date.now(),dest:lastDest,title:lastTitle,content:lastContent,cur:lastCur,date:new Date().toLocaleDateString()});
+  localStorage.setItem('voyage_hist',JSON.stringify(hist.slice(0,20)));
+}
+
+function renderHist(){
+  const t=T[lang];const hist=JSON.parse(localStorage.getItem('voyage_hist')||'[]');const list=document.getElementById('histList');
+  if(!hist.length){list.innerHTML='<p class="hist-empty">'+t.histEmpty+'</p>';return;}
+  list.innerHTML='';
+  hist.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='hist-item';
+    d.innerHTML=`<div class="hi-dest">${item.dest}</div><div class="hi-meta">${item.title} · ${item.date}</div><div class="hi-acts"><button class="hi-btn" onclick="loadHistItem(${i})">${t.histView}</button><button class="hi-btn del" onclick="delHistItem(${i})">${t.histDel}</button></div>`;
+    list.appendChild(d);
+  });
+}
+
+function loadHistItem(i){
+  const hist=JSON.parse(localStorage.getItem('voyage_hist')||'[]');const item=hist[i];
+  lastDest=item.dest;lastTitle=item.title;lastContent=item.content;
+  document.getElementById('heroDest').textContent=lastDest;document.getElementById('heroSub').textContent=lastTitle;
+  document.getElementById('rTitle').textContent=lastTitle;document.getElementById('rContent').textContent=lastContent;
+  document.getElementById('weatherBadge').style.display='none';
+  document.getElementById('flightVal').textContent='—';document.getElementById('hotelVal').textContent='—';
+  document.getElementById('priceStrip').style.display='grid';document.getElementById('resultArea').style.display='block';
+  fetchWeather(lastDest);fetchPhoto(lastDest);showView('plan');
+}
+
+function delHistItem(i){const hist=JSON.parse(localStorage.getItem('voyage_hist')||'[]');hist.splice(i,1);localStorage.setItem('voyage_hist',JSON.stringify(hist));renderHist();}
+
+applyT();
+</script>
+</body>
+</html>
